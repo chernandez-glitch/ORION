@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <Platforms>x64</Platforms>
+    <UseWinUI>true</UseWinUI>
+    <WindowsPackageType>None</WindowsPackageType>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <RootNamespace>Orion.Presentation</RootNamespace>
+    <AssemblyName>Orion.Presentation</AssemblyName>
+    <!-- MVVMTK0045: [ObservableProperty] sobre campos no es AOT-compatible en WinRT.
+         ORION no usa AOT en esta fase; migrar a partial properties es un cleanup futuro. -->
+    <NoWarn>$(NoWarn);MVVMTK0045</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Orion.Shared\Orion.Shared.csproj" />
+    <ProjectReference Include="..\Orion.Domain\Orion.Domain.csproj" />
+    <ProjectReference Include="..\Orion.Application\Orion.Application.csproj" />
+    <ProjectReference Include="..\Orion.Infrastructure\Orion.Infrastructure.csproj" />
+    <ProjectReference Include="..\Orion.Memory\Orion.Memory.csproj" />
+    <ProjectReference Include="..\Orion.AI\Orion.AI.csproj" />
+    <ProjectReference Include="..\Orion.Voice\Orion.Voice.csproj" />
+    <ProjectReference Include="..\Orion.Automation\Orion.Automation.csproj" />
+    <ProjectReference Include="..\Orion.Configuration\Orion.Configuration.csproj" />
+    <ProjectReference Include="..\Orion.Plugins\Orion.Plugins.csproj" />
+    <ProjectReference Include="..\Orion.Installer\Orion.Installer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+
+</Project>

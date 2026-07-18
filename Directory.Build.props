@@ -1,0 +1,34 @@
+<Project>
+
+  <!--
+    Propiedades comunes a TODOS los proyectos de la solución ORION.
+    No se define TargetFramework aquí: cada proyecto elige el suyo
+    (las librerías usan net10.0; Presentation usa net10.0-windows...).
+  -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+    <!-- CA1716: 'Error'/'Shared'/'Alias' chocan con palabras reservadas de VB;
+         son nombres deliberados del patrón Result y del dominio.
+         CA1848/CA1873: logging de alto rendimiento (LoggerMessage source-gen);
+         no se adopta en esta fase por legibilidad. -->
+    <!-- CA1861: arrays constantes en código autogenerado por migraciones EF Core. -->
+    <NoWarn>$(NoWarn);CA1716;CA1848;CA1873;CA1861</NoWarn>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <Deterministic>true</Deterministic>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <Authors>Grupo Platino</Authors>
+    <Product>ORION AI</Product>
+    <Company>Grupo Platino</Company>
+    <NeutralLanguage>es</NeutralLanguage>
+    <Version>0.1.0</Version>
+    <RootNamespace>$(MSBuildProjectName)</RootNamespace>
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+  </PropertyGroup>
+
+</Project>
