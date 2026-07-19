@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Orion.AI;
 using Orion.Application;
 using Orion.Automation;
@@ -37,6 +38,13 @@ public static class CompositionRoot
         services.AddOrionAutomation();
         services.AddOrionInstaller();
         services.AddOrionPlugins();
+
+        // Adaptador real de auto-update (Velopack) — reemplaza al placeholder de fase.
+        var feedUrl = Environment.GetEnvironmentVariable("ORION_UPDATE_FEED")
+            ?? "https://github.com/grupoplatino/orion-releases/releases/latest/download";
+        services.AddSingleton<Orion.Installer.IUpdateService>(sp =>
+            new Orion.Installer.VelopackUpdateService(
+                sp.GetRequiredService<ILogger<Orion.Installer.VelopackUpdateService>>(), feedUrl));
 
         // UI: ventana, vistas y ViewModels.
         RegisterPresentation(services);

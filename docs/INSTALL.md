@@ -44,7 +44,38 @@ dotnet ef migrations add <Nombre> \
   --output-dir Persistence/Migrations
 ```
 
-## Instalador (Fase 5)
+## Instalador con auto-update (Velopack)
 
-El objetivo es generar `ORION Setup.exe` con actualizaciones automáticas. Los
-contratos ya existen en `Orion.Installer` (`IUpdateService`, `UpdateInfo`).
+ORION se distribuye como `ORION Setup.exe` con **actualizaciones automáticas**
+mediante [Velopack](https://velopack.io). El cliente de update ya está integrado
+(`VelopackApp.Build().Run()` en `Program.Main` y `VelopackUpdateService : IUpdateService`).
+
+### Generar el instalador
+
+```powershell
+pwsh build/pack-installer.ps1 -Version 0.1.0
+```
+
+Esto publica self-contained y ejecuta `vpk pack`, produciendo en `releases/`:
+
+| Artefacto | Uso |
+|-----------|-----|
+| `Orion-win-Setup.exe` | Instalador para el usuario final (~80 MB) |
+| `Orion-<ver>-full.nupkg` | Paquete completo para el feed de actualizaciones |
+| `releases.win.json`, `RELEASES` | Metadatos del feed |
+| `Orion-win-Portable.zip` | Versión portable (sin instalar) |
+
+### Configurar el feed de actualizaciones
+
+1. Sube el contenido de `releases/` a un host (GitHub Releases, servidor web o
+   carpeta de red).
+2. Apunta la app a ese feed con la variable de entorno `ORION_UPDATE_FEED`
+   (o cambia la URL por defecto en `CompositionRoot`).
+3. Para publicar una nueva versión: `pwsh build/pack-installer.ps1 -Version 0.2.0`
+   y sube de nuevo `releases/`. La app detectará y aplicará la actualización.
+
+### Firma de código
+
+El `Setup.exe` se genera **sin firmar** (SmartScreen mostrará un aviso). Para
+distribución pública, firma con un certificado añadiendo `--signParams` a
+`vpk pack` (ver comentario en `build/pack-installer.ps1`).

@@ -3,6 +3,18 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El proyecto sigue versionado semántico.
 
+## [No publicado]
+
+### Añadido
+
+- **UI profesional (WinUI 3):** shell con barra de título personalizada + Mica,
+  sidebar de 9 secciones, dashboard con tarjetas y panel de actividad, navegación
+  por servicio, temas claro/oscuro persistentes, 9 vistas con ViewModel, ajustes
+  de rutas (Workspace/VS Code/Claude Code).
+- **Instalador con auto-update (Velopack):** `ORION Setup.exe` self-contained,
+  `VelopackUpdateService`, script `build/pack-installer.ps1` y feed de releases.
+- Empaquetado self-contained (runtime .NET + Windows App SDK incluidos).
+
 ## [0.1.0] — 2026-07-18
 
 ### Añadido (Fase 0 — Arquitectura y esqueleto)

@@ -15,6 +15,8 @@
     <!-- MVVMTK0045: [ObservableProperty] sobre campos no es AOT-compatible en WinRT.
          ORION no usa AOT en esta fase; migrar a partial properties es un cleanup futuro. -->
     <NoWarn>$(NoWarn);MVVMTK0045</NoWarn>
+    <!-- Usamos un Main propio (Program.cs) para inicializar Velopack antes que la UI. -->
+    <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -36,6 +38,7 @@
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Velopack" />
   </ItemGroup>
 
 </Project>
