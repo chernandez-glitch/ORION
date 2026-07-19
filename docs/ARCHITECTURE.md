@@ -54,19 +54,24 @@ en `Application` o en el módulo correspondiente; las implementaciones concretas
 
 ## Flujo de un comando
 
+Todo pasa por el **Command Engine** (ver [COMMANDS.md](COMMANDS.md)); nadie
+ejecuta acciones directamente:
+
 ```
-Usuario → CommandsPage → ICommandDispatcher.DispatchAsync("abrir-app notepad")
-   → CommandLineParser tokeniza
-   → ICommandRegistry resuelve el tipo del comando
-   → se crea un ámbito de DI y se resuelve el ICommand
-   → el comando usa puertos de Orion.Automation
-   → IMemoryService registra la ejecución en el historial
-   → Result<CommandOutcome> vuelve a la UI
+Origen (UI / Command Palette / voz / IA / plugin)
+   → ICommandExecutor.ExecuteAsync("abrir-app notepad")
+   → ICommandParser interpreta (comando + parámetros)   [Fase 2: parser de IA]
+   → ICommandRegistry resuelve el comando
+   → se crea un ámbito de DI y se resuelve el ICommandHandler
+   → ICommandPipeline: Validación → Autorización → Logging → Ejecución → Resultado → Historial
+   → el comando usa puertos (IProcessAutomation real, IDialogService…)
+   → CommandResult (Success/Warning/Failed/Cancelled) vuelve al origen
 ```
 
 ## Ámbitos de DI (importante)
 
 El `DbContext` de EF es *scoped*. Para evitar dependencias cautivas, el
-`CommandDispatcher` y el `DashboardService` (singletons) crean **un ámbito por
-operación** con `IServiceScopeFactory` y resuelven ahí `IMemoryService`. Los
-comandos se registran como *transient* y se resuelven dentro de ese ámbito.
+`CommandExecutor` y el `DashboardService` (singletons) crean **un ámbito por
+operación** con `IServiceScopeFactory` y resuelven ahí el pipeline, el handler y
+la memoria. Los comandos se registran como *transient* y se resuelven dentro de
+ese ámbito.

@@ -1,38 +1,37 @@
 using Orion.Application.Memory;
 using Orion.Automation.Abstractions;
-using Orion.Shared.Results;
 
 namespace Orion.Application.Commands.BuiltIn;
 
-/// <summary>
-/// Abre un proyecto favorito recordado en memoria (resuelve su ruta por nombre
-/// y lo abre en VS Code). Ilustra la colaboración memoria + automatización.
-/// </summary>
-public sealed class OpenProjectCommand(IMemoryService memory, IProcessAutomation process) : ICommand
+/// <summary>Abre un proyecto favorito recordado en memoria (lo abre en VS Code).</summary>
+public sealed class OpenProjectCommand(IMemoryService memory, IProcessAutomation process) : CommandBase
 {
-    public CommandDescriptor Descriptor { get; } = new(
-        "abrir-proyecto",
-        "Abre un proyecto favorito por su nombre recordado.",
-        CommandCategory.Development,
-        "proyecto", "project");
+    public override string Id => "vscode.open-project";
 
-    public async Task<Result<CommandOutcome>> ExecuteAsync(CommandRequest request, CancellationToken cancellationToken = default)
+    public override string Name => "Abrir proyecto";
+
+    public override string Description => "Abre un proyecto favorito por su nombre recordado.";
+
+    public override CommandCategory Category => CommandCategory.VSCode;
+
+    public override IReadOnlyList<string> Aliases => ["proyecto", "project", "abrir-proyecto"];
+
+    public override IReadOnlyList<CommandParameter> Parameters =>
+        [new CommandParameter("name", "Nombre del proyecto favorito.", IsRequired: true, Example: "orion")];
+
+    public override async Task<CommandResult> ExecuteAsync(ICommandContext context)
     {
-        if (request.FirstArgument is not { } name)
-        {
-            return Result.Failure<CommandOutcome>(CommandErrors.MissingArgument("nombre del proyecto"));
-        }
+        var name = context.GetParameter("name")!;
 
-        var project = await memory.GetProjectByNameAsync(name, cancellationToken).ConfigureAwait(false);
+        var project = await memory.GetProjectByNameAsync(name, context.CancellationToken).ConfigureAwait(false);
         if (project.IsFailure)
         {
-            return Result.Failure<CommandOutcome>(project.Error);
+            return CommandResult.Failed(project.Error.Message);
         }
 
-        var launch = await process.LaunchAsync("code", project.Value.Path, cancellationToken).ConfigureAwait(false);
-
+        var launch = await process.LaunchAsync("code", project.Value.Path, context.CancellationToken).ConfigureAwait(false);
         return launch.IsSuccess
-            ? Result.Success(CommandOutcome.Ok($"Abriendo el proyecto '{project.Value.Name}'."))
-            : Result.Failure<CommandOutcome>(launch.Error);
+            ? CommandResult.Success($"Abriendo el proyecto '{project.Value.Name}'.")
+            : CommandResult.Failed(launch.Error.Message);
     }
 }

@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Orion.Application.Dashboard;
+using Orion.Automation.Abstractions;
+using Orion.Infrastructure.Automation;
 using Orion.Domain.Automations;
 using Orion.Domain.Common;
 using Orion.Domain.Conversations;
@@ -45,6 +47,12 @@ public static class DependencyInjection
         services.AddScoped<IAutomationRepository, AutomationRepository>();
 
         services.AddSingleton<ISystemMetrics, SystemMetrics>();
+
+        // Adaptadores de automatización REALES (proceso y energía). Se registran
+        // antes que AddOrionAutomation (que usa TryAdd), por lo que ganan; el
+        // resto de puertos (archivo/input/ventana) siguen con el no-op de la Fase 0.
+        services.AddSingleton<IProcessAutomation, WindowsProcessAutomation>();
+        services.AddSingleton<IPowerAutomation, WindowsPowerAutomation>();
 
         return services;
     }

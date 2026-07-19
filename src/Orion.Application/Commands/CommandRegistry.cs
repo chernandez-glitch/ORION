@@ -6,14 +6,13 @@ namespace Orion.Application.Commands;
 
 /// <summary>
 /// Construye el índice de comandos a partir de todas las implementaciones de
-/// <see cref="ICommand"/>. Al iniciarse, resuelve los comandos en un ámbito
-/// temporal solo para leer sus descriptores y mapear token → tipo; no conserva
-/// las instancias. Registrar un comando nuevo es tan simple como crear la clase.
+/// <see cref="ICommand"/>. Al iniciarse resuelve los comandos en un ámbito
+/// temporal solo para leer sus metadatos; no retiene las instancias.
 /// </summary>
 public sealed class CommandRegistry : ICommandRegistry
 {
-    private readonly Dictionary<string, Type> _byToken = new(StringComparer.OrdinalIgnoreCase);
-    private readonly List<CommandDescriptor> _descriptors = [];
+    private readonly Dictionary<string, CommandInfo> _byKey = new(StringComparer.OrdinalIgnoreCase);
+    private readonly List<CommandInfo> _commands = [];
 
     public CommandRegistry(IServiceScopeFactory scopeFactory, ILogger<CommandRegistry> logger)
     {
@@ -21,25 +20,41 @@ public sealed class CommandRegistry : ICommandRegistry
 
         foreach (var command in scope.ServiceProvider.GetServices<ICommand>())
         {
-            _descriptors.Add(command.Descriptor);
-            var type = command.GetType();
+            var info = new CommandInfo(
+                command.Id,
+                command.Name,
+                command.Description,
+                command.Category,
+                command.Permission,
+                command.Aliases,
+                command.Parameters,
+                command.GetType());
 
-            foreach (var token in command.Descriptor.AllTokens)
+            _commands.Add(info);
+
+            foreach (var key in info.Keys)
             {
-                if (_byToken.TryAdd(token, type))
+                if (!_byKey.TryAdd(key, info))
                 {
-                    continue;
+                    logger.LogWarning("Clave de comando duplicada '{Key}'; se ignora la de {Type}.", key, info.HandlerType.Name);
                 }
-
-                logger.LogWarning("El token de comando '{Token}' está duplicado; se ignora el de {Type}.", token, type.Name);
             }
         }
 
-        logger.LogInformation("Motor de comandos: {Count} comandos registrados.", _descriptors.Count);
+        _commands.Sort((a, b) =>
+        {
+            var byCategory = a.Category.CompareTo(b.Category);
+            return byCategory != 0 ? byCategory : string.Compare(a.Name, b.Name, StringComparison.Ordinal);
+        });
+
+        logger.LogInformation("Motor de comandos: {Count} comandos registrados.", _commands.Count);
     }
 
-    public IReadOnlyList<CommandDescriptor> Descriptors => _descriptors;
+    public IReadOnlyList<CommandInfo> Commands => _commands;
 
-    public bool TryGetCommandType(string nameOrAlias, [NotNullWhen(true)] out Type? commandType) =>
-        _byToken.TryGetValue(nameOrAlias, out commandType);
+    public bool TryGet(string key, [NotNullWhen(true)] out CommandInfo? command) =>
+        _byKey.TryGetValue(key, out command);
+
+    public IReadOnlyList<CommandInfo> Search(string term) =>
+        _commands.Where(c => c.Matches(term)).ToArray();
 }

@@ -6,7 +6,10 @@ en verde.
 ## Fase 0 — Arquitectura y esqueleto ✅ (esta entrega)
 
 - 12 proyectos + tests bajo Clean Architecture, compilando sin errores ni warnings.
-- Motor de comandos con descubrimiento automático y 8 comandos.
+- **Command Engine profesional**: pipeline (validación→autorización→logging→ejecución→resultado→historial),
+  registro automático, parser desacoplado, permisos, parámetros, `CommandResult`
+  uniforme, historial persistido y **Command Palette** (Ctrl+Shift+P) con búsqueda,
+  favoritos y recientes. Comandos reales (abrir app/carpeta/URL/Explorador, mensaje).
 - Sistema de memoria implementado (SQLite + EF Core).
 - Configuración persistente (JSON) + pantalla de ajustes.
 - Sistema de plugins (host + loader + catálogo).
@@ -21,8 +24,10 @@ ventanas, energía) con confirmaciones de seguridad.
 
 ## Fase 2 — Inteligencia Artificial
 
-Implementar `IAIProvider` empezando por Ollama (local) y Claude. Interpretación de
-lenguaje natural → comandos.
+Implementar `IAIProvider` empezando por Ollama (local) y Claude. Un
+`AiCommandParser : ICommandParser` traducirá lenguaje natural a comandos del
+Command Engine (sin cambiar el resto del motor). La IA **produce comandos**;
+nunca ejecuta acciones directamente.
 
 ## Fase 3 — Voz
 

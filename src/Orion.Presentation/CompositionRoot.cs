@@ -58,13 +58,17 @@ public static class CompositionRoot
 
     private static void RegisterPresentation(IServiceCollection services)
     {
-        // Servicios de UI (navegación y tema).
+        // Servicios de UI (navegación, tema y diálogos).
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IThemeService, ThemeService>();
+        services.AddSingleton<DialogService>();
+        services.AddSingleton<Orion.Application.Commands.Abstractions.IDialogService>(
+            sp => sp.GetRequiredService<DialogService>());
 
         // Ventana y shell.
         services.AddSingleton<MainWindow>();
         services.AddSingleton<ShellViewModel>();
+        services.AddSingleton<CommandPaletteViewModel>();
 
         // Páginas.
         services.AddTransient<DashboardPage>();

@@ -8,9 +8,9 @@ namespace Orion.Application;
 public static class DependencyInjection
 {
     /// <summary>
-    /// Registra la capa de aplicación: reloj, contexto de usuario, motor de
-    /// comandos (con descubrimiento automático de todos los <see cref="ICommand"/>)
-    /// y el servicio de dashboard.
+    /// Registra la capa de aplicación: reloj, contexto de usuario, el motor de
+    /// comandos completo (registro automático de comandos, pipeline, executor,
+    /// registry, validador, autorizador, historial y parser) y el dashboard.
     /// </summary>
     public static IServiceCollection AddOrionApplication(this IServiceCollection services)
     {
@@ -19,30 +19,37 @@ public static class DependencyInjection
 
         RegisterCommands(services);
 
+        // Motor de comandos.
         services.AddSingleton<ICommandRegistry, CommandRegistry>();
-        services.AddSingleton<ICommandDispatcher, CommandDispatcher>();
+        services.AddSingleton<ICommandParser, DefaultCommandParser>();
+        services.AddSingleton<ICommandValidator, CommandValidator>();
+        services.AddSingleton<ICommandAuthorizer, DefaultCommandAuthorizer>();
+        services.AddScoped<ICommandHistory, MemoryCommandHistory>();
+        services.AddScoped<ICommandPipeline, CommandPipeline>();
+        services.AddSingleton<ICommandExecutor, CommandExecutor>();
+
         services.AddSingleton<IDashboardService, DashboardService>();
 
         return services;
     }
 
     /// <summary>
-    /// Descubre por reflexión todas las implementaciones concretas de
-    /// <see cref="ICommand"/> en este ensamblado y las registra como transitorias
-    /// (una instancia nueva por ejecución, dentro de su propio ámbito de DI).
-    /// Cada comando es resoluble por su tipo concreto y como <see cref="ICommand"/>.
+    /// Descubre por reflexión todas las clases concretas que heredan de
+    /// <see cref="CommandBase"/> y las registra como transitorias (una instancia
+    /// por ejecución, dentro de su propio ámbito de DI) y como <see cref="ICommand"/>.
+    /// Agregar un comando nuevo no requiere tocar la configuración de DI.
     /// </summary>
     private static void RegisterCommands(IServiceCollection services)
     {
-        var commandType = typeof(ICommand);
+        var commandBase = typeof(CommandBase);
         var implementations = typeof(DependencyInjection).Assembly
             .GetTypes()
-            .Where(t => t is { IsClass: true, IsAbstract: false } && commandType.IsAssignableFrom(t));
+            .Where(t => t is { IsClass: true, IsAbstract: false } && commandBase.IsAssignableFrom(t));
 
         foreach (var implementation in implementations)
         {
             services.AddTransient(implementation);
-            services.AddTransient(commandType, sp => sp.GetRequiredService(implementation));
+            services.AddTransient(typeof(ICommand), sp => sp.GetRequiredService(implementation));
         }
     }
 }

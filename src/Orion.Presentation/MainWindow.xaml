@@ -21,6 +21,10 @@
             </DataTemplate>
         </Grid.Resources>
 
+        <Grid.KeyboardAccelerators>
+            <KeyboardAccelerator Modifiers="Control,Shift" Key="P" Invoked="OpenPalette_Invoked" />
+        </Grid.KeyboardAccelerators>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="48" />
             <RowDefinition Height="*" />
@@ -109,5 +113,83 @@
                 </StackPanel>
             </Grid>
         </Border>
+
+        <!-- ===================== COMMAND PALETTE (Ctrl+Shift+P) ===================== -->
+        <Grid x:Name="PaletteOverlay" Grid.Row="0" Grid.RowSpan="3"
+              Background="#88000000"
+              DataContext="{x:Bind Palette}"
+              Visibility="{x:Bind Palette.OverlayVisibility, Mode=OneWay}">
+            <Border Width="640" MaxHeight="540" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,72,0,0"
+                    Background="{ThemeResource LayerFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+                <Grid Padding="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBox x:Name="PaletteSearch" Grid.Row="0" Margin="4"
+                             PlaceholderText="Escribe un comando…  (Enter ejecuta · Esc cierra)"
+                             KeyDown="PaletteSearch_KeyDown"
+                             Text="{x:Bind Palette.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <StackPanel Grid.Row="1" Margin="4,6,4,0"
+                                Visibility="{x:Bind Palette.RecentsVisibility, Mode=OneWay}">
+                        <TextBlock Text="Recientes" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Margin="4,0,0,4" />
+                        <ItemsControl ItemsSource="{x:Bind Palette.Recents, Mode=OneWay}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="6" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <Button Content="{x:Bind}" FontSize="12" Padding="8,2"
+                                            Command="{Binding DataContext.UseRecentCommand, ElementName=PaletteOverlay}"
+                                            CommandParameter="{x:Bind}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <ListView Grid.Row="2" ItemsSource="{x:Bind Palette.Results, Mode=OneWay}" SelectionMode="None" Margin="0,8,0,0">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="models:PaletteItem">
+                                <Grid ColumnSpacing="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                                            Background="Transparent" BorderThickness="0" Padding="8,6"
+                                            Command="{Binding DataContext.InvokeCommand, ElementName=PaletteOverlay}"
+                                            CommandParameter="{Binding}">
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" />
+                                                <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" CornerRadius="8" Padding="6,1" VerticalAlignment="Center">
+                                                    <TextBlock Text="{x:Bind Category}" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                                </Border>
+                                            </StackPanel>
+                                            <TextBlock Text="{x:Bind Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Grid.Column="1" Style="{StaticResource IconButtonStyle}" VerticalAlignment="Center"
+                                            Command="{Binding DataContext.ToggleFavoriteCommand, ElementName=PaletteOverlay}"
+                                            CommandParameter="{Binding}" ToolTipService.ToolTip="Favorito">
+                                        <FontIcon Glyph="{x:Bind FavoriteGlyph, Mode=OneWay}" FontSize="14" />
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+
+                    <TextBlock Grid.Row="3" Text="{x:Bind Palette.StatusMessage, Mode=OneWay}" Margin="8,6,8,2"
+                               FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </Window>

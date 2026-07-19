@@ -1,24 +1,30 @@
 using Orion.Automation.Abstractions;
-using Orion.Shared.Results;
 
 namespace Orion.Application.Commands.BuiltIn;
 
 /// <summary>Abre Visual Studio Code, opcionalmente en una carpeta.</summary>
-public sealed class OpenVSCodeCommand(IProcessAutomation process) : ICommand
+public sealed class OpenVSCodeCommand(IProcessAutomation process) : CommandBase
 {
-    public CommandDescriptor Descriptor { get; } = new(
-        "abrir-vscode",
-        "Abre Visual Studio Code en la carpeta indicada (o en la actual).",
-        CommandCategory.Development,
-        "vscode", "code");
+    public override string Id => "vscode.open";
 
-    public async Task<Result<CommandOutcome>> ExecuteAsync(CommandRequest request, CancellationToken cancellationToken = default)
+    public override string Name => "Abrir VS Code";
+
+    public override string Description => "Abre Visual Studio Code en la carpeta indicada (o en la actual).";
+
+    public override CommandCategory Category => CommandCategory.VSCode;
+
+    public override IReadOnlyList<string> Aliases => ["vscode", "code", "abrir vscode", "abrir codigo"];
+
+    public override IReadOnlyList<CommandParameter> Parameters =>
+        [new CommandParameter("path", "Carpeta a abrir.", IsRequired: false, Example: @"C:\repos\orion")];
+
+    public override async Task<CommandResult> ExecuteAsync(ICommandContext context)
     {
-        var path = request.FirstArgument ?? ".";
-        var result = await process.LaunchAsync("code", path, cancellationToken).ConfigureAwait(false);
+        var path = context.HasParameter("path") ? context.GetParameter("path")! : ".";
+        var result = await process.LaunchAsync("code", path, context.CancellationToken).ConfigureAwait(false);
 
         return result.IsSuccess
-            ? Result.Success(CommandOutcome.Ok($"Abriendo VS Code en '{path}'."))
-            : Result.Failure<CommandOutcome>(result.Error);
+            ? CommandResult.Success($"Abriendo VS Code en '{path}'.")
+            : CommandResult.Failed(result.Error.Message);
     }
 }

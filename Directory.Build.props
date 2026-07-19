@@ -17,8 +17,9 @@
          son nombres deliberados del patrón Result y del dominio.
          CA1848/CA1873: logging de alto rendimiento (LoggerMessage source-gen);
          no se adopta en esta fase por legibilidad. -->
-    <!-- CA1861: arrays constantes en código autogenerado por migraciones EF Core. -->
-    <NoWarn>$(NoWarn);CA1716;CA1848;CA1873;CA1861</NoWarn>
+    <!-- CA1861: arrays constantes en código autogenerado por migraciones EF Core.
+         CA1711: 'CommandPermission' es un nombre de dominio deliberado. -->
+    <NoWarn>$(NoWarn);CA1716;CA1848;CA1873;CA1861;CA1711</NoWarn>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <Deterministic>true</Deterministic>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>

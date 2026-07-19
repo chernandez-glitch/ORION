@@ -1,51 +1,103 @@
-# Motor de comandos
+# Motor de comandos (Command Engine)
 
-El motor traduce una línea de texto en la ejecución de un `ICommand`.
+**Toda acción de ORION se ejecuta a través del Command Engine.** La voz, la IA,
+la automatización y los plugins nunca actúan directamente: envían un comando al
+motor. Esto centraliza validación, autorización, logging e historial.
 
 ## Piezas
 
-- **`ICommand`** — un comando ejecutable con su `CommandDescriptor` (nombre, alias,
-  descripción, categoría) y `ExecuteAsync(CommandRequest)`.
-- **`ICommandRegistry`** — índice token → tipo de comando. Se construye por
-  reflexión al arrancar.
-- **`ICommandDispatcher`** — parsea, resuelve, ejecuta (midiendo duración) y
-  registra en el historial de memoria.
-- **`CommandLineParser`** — tokeniza respetando comillas dobles.
+| Interfaz | Rol |
+|----------|-----|
+| `ICommand` | Metadatos: Id, Nombre, Descripción, Categoría, Permiso, Alias, Parámetros |
+| `ICommandHandler` | Ejecuta la lógica (`ExecuteAsync(ICommandContext)`) |
+| `CommandBase` | Base que une metadatos + ejecución (una clase por comando) |
+| `ICommandContext` | Contexto: clave invocada, parámetros, usuario, cancelación |
+| `ICommandRegistry` | Índice de comandos; resuelve por Id/alias y busca |
+| `ICommandValidator` | Valida (p. ej. parámetros obligatorios) |
+| `ICommandAuthorizer` | Autoriza según `CommandPermission` |
+| `ICommandPipeline` | Orquesta las etapas de ejecución |
+| `ICommandExecutor` | **Punto de entrada único** del motor |
+| `ICommandHistory` | Persiste el historial (sobre memoria/SQLite) |
+| `ICommandParser` | Interpreta texto → comando (preparado para IA) |
+
+`CommandResult` es el resultado uniforme: `Success` · `Warning` · `Failed` ·
+`Cancelled`, con mensaje y datos.
+
+## Pipeline de ejecución
+
+Todo comando pasa por (`CommandPipeline`):
+
+```
+1. Validación     → ICommandValidator (parámetros obligatorios)
+2. Autorización   → ICommandAuthorizer (permiso del comando)
+3. Logging        → Serilog (inicio)
+4. Ejecución      → ICommandHandler.ExecuteAsync (medida y protegida)
+5. Resultado      → CommandResult + Serilog (cierre)
+6. Historial      → ICommandHistory (hora, duración, resultado, error, usuario, parámetros)
+```
+
+El pipeline **nunca lanza excepciones** al llamador: las traduce a un
+`CommandResult.Failed`.
+
+## Registro automático
+
+Los comandos se **descubren por reflexión**: toda clase concreta que herede de
+`CommandBase` se registra sola en DI (`AddOrionApplication`). No hay que
+registrar nada a mano. El motor soporta cientos de comandos sin cambios de
+configuración.
 
 ## Comandos incluidos
 
-| Comando | Alias | Categoría |
-|---------|-------|-----------|
-| `abrir-app` | app, open-app, ejecutar | System |
-| `abrir-carpeta` | carpeta, folder | Files |
-| `abrir-navegador` | navegador, web, browser | Web |
-| `abrir-vscode` | vscode, code | Development |
-| `abrir-proyecto` | proyecto, project | Development |
-| `apagar` | shutdown | Power |
-| `reiniciar` | restart | Power |
-| `bloquear` | lock | Power |
+| Comando | Id | Categoría | Alias |
+|---------|----|-----------|-------|
+| Abrir aplicación | `apps.open` | Applications | abrir-app, run, ejecutar |
+| Abrir carpeta | `folders.open` | Folders | abrir-carpeta, folder |
+| Abrir URL | `internet.open-url` | Internet | abrir-url, url, web, navegador |
+| Mostrar mensaje | `system.show-message` | System | mensaje, msg |
+| Abrir Explorador | `system.open-explorer` | System | explorador, explorer |
+| Abrir VS Code | `vscode.open` | VSCode | vscode, code |
+| Abrir proyecto | `vscode.open-project` | VSCode | proyecto, project |
+| Apagar / Reiniciar / Bloquear | `system.shutdown` / `.restart` / `.lock` | System | apagar, reiniciar, bloquear |
 
-> En Fase 0 los comandos delegan en los puertos de `Orion.Automation`, cuyo
-> adaptador es un *no-op seguro*: devuelven un `Result` de error controlado
-> ("automatización no implementada en esta fase") en lugar de actuar sobre el
-> sistema. La Fase 1 conecta los adaptadores Windows reales.
+Los cinco primeros **funcionan de verdad** (lanzan procesos vía el adaptador
+`WindowsProcessAutomation`; `Mostrar mensaje` usa un `ContentDialog`).
 
-## Cómo crear un comando
+## Command Palette (Ctrl+Shift+P)
 
-1. Crea una clase que implemente `ICommand` en `Orion.Application/Commands/BuiltIn/`.
-2. Define su `CommandDescriptor` (nombre, descripción, categoría, alias).
-3. Inyecta los puertos que necesite (p. ej. `IProcessAutomation`, `IMemoryService`).
-4. Devuelve `Result<CommandOutcome>`.
+Estilo VS Code / Cursor. Se abre con **Ctrl+Shift+P** y permite:
 
-No hay que registrar nada: el motor lo **descubre automáticamente**.
+- **Buscar** por nombre, categoría, descripción y alias.
+- **Ejecutar** (Enter ejecuta la línea escrita; los comandos con parámetros
+  precargan la caja para completarlos).
+- **Favoritos** (★, persistidos en la configuración).
+- **Recientes** (del historial).
+
+## Cómo agregar un comando nuevo
+
+Una sola clase:
 
 ```csharp
-public sealed class SaludarCommand : ICommand
+public sealed class SaludarCommand : CommandBase
 {
-    public CommandDescriptor Descriptor { get; } = new(
-        "saludar", "Devuelve un saludo.", CommandCategory.System, "hola");
+    public override string Id => "system.greet";
+    public override string Name => "Saludar";
+    public override string Description => "Devuelve un saludo.";
+    public override CommandCategory Category => CommandCategory.System;
+    public override IReadOnlyList<string> Aliases => ["hola", "saludar"];
 
-    public Task<Result<CommandOutcome>> ExecuteAsync(CommandRequest request, CancellationToken ct = default)
-        => Task.FromResult(Result.Success(CommandOutcome.Ok("¡Hola! Soy ORION.")));
+    public override Task<CommandResult> ExecuteAsync(ICommandContext context) =>
+        Task.FromResult(CommandResult.Success("¡Hola! Soy ORION."));
 }
 ```
+
+Se descubre y registra automáticamente. Si necesita dependencias (p. ej.
+`IProcessAutomation`), se inyectan por constructor.
+
+## Cómo lo usará la IA (Fase 2)
+
+El parser está desacoplado tras `ICommandParser`. Hoy el `DefaultCommandParser`
+es sintáctico (primer token = comando, resto = parámetros). En la Fase 2, un
+`AiCommandParser` implementará la **misma interfaz** para traducir lenguaje
+natural ("abre el bloc de notas") a `CommandParseResult` (comando + parámetros),
+y el `ICommandExecutor` lo ejecutará por el mismo pipeline. **El resto del motor
+no cambia**: la IA solo produce comandos; nunca ejecuta acciones directamente.

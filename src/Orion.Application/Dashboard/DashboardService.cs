@@ -34,7 +34,7 @@ public sealed class DashboardService(
         var recentResult = await memory.GetRecentCommandsAsync(RecentCommandsToShow, cancellationToken).ConfigureAwait(false);
         IReadOnlyList<CommandHistoryDto> recent = recentResult.IsSuccess ? recentResult.Value : [];
 
-        var snapshot = new DashboardSnapshot(modules, metrics, recent, commandRegistry.Descriptors.Count);
+        var snapshot = new DashboardSnapshot(modules, metrics, recent, commandRegistry.Commands.Count);
         return Result.Success(snapshot);
     }
 }

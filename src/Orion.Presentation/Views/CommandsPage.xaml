@@ -47,7 +47,7 @@
                     <TextBlock Text="Comandos disponibles" Style="{StaticResource CardHeaderTextStyle}" />
                     <ListView ItemsSource="{x:Bind ViewModel.Commands}" SelectionMode="None">
                         <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="cmd:CommandDescriptor">
+                            <DataTemplate x:DataType="cmd:CommandInfo">
                                 <Grid Padding="0,8" ColumnSpacing="12">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />

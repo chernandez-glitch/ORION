@@ -27,6 +27,9 @@ public sealed class OrionSettings
     public List<FavoriteRouteSettings> FavoriteRoutes { get; set; } = [];
 
     public List<FavoriteProjectSettings> FavoriteProjects { get; set; } = [];
+
+    /// <summary>Ids de comandos marcados como favoritos en la Command Palette.</summary>
+    public List<string> FavoriteCommandIds { get; set; } = [];
 }
 
 /// <summary>Identidad y activación del asistente.</summary>

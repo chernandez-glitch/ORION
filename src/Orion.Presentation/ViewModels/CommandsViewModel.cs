@@ -6,21 +6,20 @@ using Orion.Application.Commands;
 namespace Orion.Presentation.ViewModels;
 
 /// <summary>
-/// ViewModel de la consola de comandos: lista los comandos disponibles y ejecuta
-/// la línea escrita por el usuario a través del motor de comandos.
+/// ViewModel de la vista de comandos: lista los comandos disponibles y ejecuta
+/// la línea escrita por el usuario a través del <see cref="ICommandExecutor"/>.
 /// </summary>
 public sealed partial class CommandsViewModel : ObservableObject
 {
-    private readonly ICommandDispatcher _dispatcher;
+    private readonly ICommandExecutor _executor;
 
-    public CommandsViewModel(ICommandRegistry registry, ICommandDispatcher dispatcher)
+    public CommandsViewModel(ICommandRegistry registry, ICommandExecutor executor)
     {
-        _dispatcher = dispatcher;
-        Commands = new ObservableCollection<CommandDescriptor>(
-            registry.Descriptors.OrderBy(d => d.Category).ThenBy(d => d.Name));
+        _executor = executor;
+        Commands = new ObservableCollection<CommandInfo>(registry.Commands);
     }
 
-    public ObservableCollection<CommandDescriptor> Commands { get; }
+    public ObservableCollection<CommandInfo> Commands { get; }
 
     [ObservableProperty]
     private string _input = string.Empty;
@@ -45,9 +44,9 @@ public sealed partial class CommandsViewModel : ObservableObject
         IsBusy = true;
         try
         {
-            var result = await _dispatcher.DispatchAsync(Input).ConfigureAwait(true);
+            var result = await _executor.ExecuteAsync(Input).ConfigureAwait(true);
             LastSucceeded = result.IsSuccess;
-            Output = result.IsSuccess ? result.Value.Message : result.Error.Message;
+            Output = result.Message;
         }
         finally
         {

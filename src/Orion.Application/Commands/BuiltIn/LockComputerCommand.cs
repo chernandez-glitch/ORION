@@ -1,23 +1,25 @@
 using Orion.Automation.Abstractions;
-using Orion.Shared.Results;
 
 namespace Orion.Application.Commands.BuiltIn;
 
 /// <summary>Bloquea la sesión de Windows.</summary>
-public sealed class LockComputerCommand(IPowerAutomation power) : ICommand
+public sealed class LockComputerCommand(IPowerAutomation power) : CommandBase
 {
-    public CommandDescriptor Descriptor { get; } = new(
-        "bloquear",
-        "Bloquea la sesión de Windows.",
-        CommandCategory.Power,
-        "lock");
+    public override string Id => "system.lock";
 
-    public async Task<Result<CommandOutcome>> ExecuteAsync(CommandRequest request, CancellationToken cancellationToken = default)
+    public override string Name => "Bloquear equipo";
+
+    public override string Description => "Bloquea la sesión de Windows.";
+
+    public override CommandCategory Category => CommandCategory.System;
+
+    public override IReadOnlyList<string> Aliases => ["bloquear", "lock"];
+
+    public override async Task<CommandResult> ExecuteAsync(ICommandContext context)
     {
-        var result = await power.LockAsync(cancellationToken).ConfigureAwait(false);
-
+        var result = await power.LockAsync(context.CancellationToken).ConfigureAwait(false);
         return result.IsSuccess
-            ? Result.Success(CommandOutcome.Ok("Sesión bloqueada."))
-            : Result.Failure<CommandOutcome>(result.Error);
+            ? CommandResult.Success("Sesión bloqueada.")
+            : CommandResult.Failed(result.Error.Message);
     }
 }

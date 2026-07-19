@@ -1,29 +1,30 @@
 using Orion.Automation.Abstractions;
-using Orion.Shared.Results;
 
 namespace Orion.Application.Commands.BuiltIn;
 
-/// <summary>Abre una aplicación por ruta o nombre de ejecutable.</summary>
-public sealed class OpenApplicationCommand(IProcessAutomation process) : ICommand
+/// <summary>Abre una aplicación por ruta o nombre de ejecutable (notepad, calc, Code…).</summary>
+public sealed class OpenApplicationCommand(IProcessAutomation process) : CommandBase
 {
-    public CommandDescriptor Descriptor { get; } = new(
-        "abrir-app",
-        "Abre una aplicación por ruta o nombre (p. ej. abrir-app notepad).",
-        CommandCategory.System,
-        "app", "open-app", "ejecutar");
+    public override string Id => "apps.open";
 
-    public async Task<Result<CommandOutcome>> ExecuteAsync(CommandRequest request, CancellationToken cancellationToken = default)
+    public override string Name => "Abrir aplicación";
+
+    public override string Description => "Abre una aplicación por su nombre o ruta (p. ej. notepad, calc, Code).";
+
+    public override CommandCategory Category => CommandCategory.Applications;
+
+    public override IReadOnlyList<string> Aliases => ["abrir-app", "abrir aplicacion", "open app", "run", "ejecutar"];
+
+    public override IReadOnlyList<CommandParameter> Parameters =>
+        [new CommandParameter("app", "Nombre o ruta del ejecutable.", IsRequired: true, Example: "notepad")];
+
+    public override async Task<CommandResult> ExecuteAsync(ICommandContext context)
     {
-        if (request.FirstArgument is not { } target)
-        {
-            return Result.Failure<CommandOutcome>(CommandErrors.MissingArgument("aplicación"));
-        }
-
-        var arguments = request.Arguments.Count > 1 ? string.Join(' ', request.Arguments.Skip(1)) : null;
-        var result = await process.LaunchAsync(target, arguments, cancellationToken).ConfigureAwait(false);
+        var app = context.GetParameter("app")!;
+        var result = await process.LaunchAsync(app, arguments: null, context.CancellationToken).ConfigureAwait(false);
 
         return result.IsSuccess
-            ? Result.Success(CommandOutcome.Ok($"Abriendo '{target}'.", result.Value))
-            : Result.Failure<CommandOutcome>(result.Error);
+            ? CommandResult.Success($"Abriendo '{app}'.", result.Value)
+            : CommandResult.Failed(result.Error.Message);
     }
 }

@@ -8,6 +8,7 @@
     <ProjectReference Include="..\Orion.Shared\Orion.Shared.csproj" />
     <ProjectReference Include="..\Orion.Domain\Orion.Domain.csproj" />
     <ProjectReference Include="..\Orion.Application\Orion.Application.csproj" />
+    <ProjectReference Include="..\Orion.Automation\Orion.Automation.csproj" />
   </ItemGroup>
 
   <ItemGroup>

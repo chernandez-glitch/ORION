@@ -1,28 +1,30 @@
 using Orion.Automation.Abstractions;
-using Orion.Shared.Results;
 
 namespace Orion.Application.Commands.BuiltIn;
 
 /// <summary>Abre una carpeta en el Explorador de Windows.</summary>
-public sealed class OpenFolderCommand(IProcessAutomation process) : ICommand
+public sealed class OpenFolderCommand(IProcessAutomation process) : CommandBase
 {
-    public CommandDescriptor Descriptor { get; } = new(
-        "abrir-carpeta",
-        "Abre una carpeta en el Explorador (p. ej. abrir-carpeta \"C:\\Proyectos\").",
-        CommandCategory.Files,
-        "carpeta", "folder");
+    public override string Id => "folders.open";
 
-    public async Task<Result<CommandOutcome>> ExecuteAsync(CommandRequest request, CancellationToken cancellationToken = default)
+    public override string Name => "Abrir carpeta";
+
+    public override string Description => "Abre una carpeta en el Explorador de Windows.";
+
+    public override CommandCategory Category => CommandCategory.Folders;
+
+    public override IReadOnlyList<string> Aliases => ["abrir-carpeta", "carpeta", "open folder", "folder"];
+
+    public override IReadOnlyList<CommandParameter> Parameters =>
+        [new CommandParameter("path", "Ruta de la carpeta.", IsRequired: true, Example: @"C:\Proyectos")];
+
+    public override async Task<CommandResult> ExecuteAsync(ICommandContext context)
     {
-        if (request.FirstArgument is not { } path)
-        {
-            return Result.Failure<CommandOutcome>(CommandErrors.MissingArgument("ruta"));
-        }
-
-        var result = await process.LaunchAsync("explorer.exe", path, cancellationToken).ConfigureAwait(false);
+        var path = context.GetParameter("path")!;
+        var result = await process.LaunchAsync("explorer.exe", path, context.CancellationToken).ConfigureAwait(false);
 
         return result.IsSuccess
-            ? Result.Success(CommandOutcome.Ok($"Abriendo la carpeta '{path}'."))
-            : Result.Failure<CommandOutcome>(result.Error);
+            ? CommandResult.Success($"Abriendo la carpeta '{path}'.")
+            : CommandResult.Failed(result.Error.Message);
     }
 }
