@@ -1,0 +1,71 @@
+name: Release
+
+# Publica ORION Setup.exe + feed de auto-update en GitHub Releases al empujar un tag vX.Y.Z.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write   # necesario para crear el release con GITHUB_TOKEN
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Calcular versión desde el tag
+        id: ver
+        shell: bash
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Restaurar y testear
+        shell: pwsh
+        run: |
+          dotnet test tests/Orion.Tests/Orion.Tests.csproj -c Release
+
+      - name: Instalar vpk (Velopack CLI)
+        shell: pwsh
+        run: |
+          dotnet tool install -g vpk --version 1.2.0
+          "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Append
+
+      - name: Publicar self-contained
+        shell: pwsh
+        run: |
+          dotnet publish src/Orion.Presentation/Orion.Presentation.csproj `
+            -c Release -r win-x64 --self-contained true `
+            -p:WindowsAppSDKSelfContained=true `
+            -o publish/win-x64
+
+      - name: Empaquetar instalador
+        shell: pwsh
+        run: |
+          vpk pack `
+            -u Orion `
+            -v ${{ steps.ver.outputs.version }} `
+            -p publish/win-x64 `
+            -e Orion.Presentation.exe `
+            -o releases `
+            --packTitle "ORION AI" `
+            --packAuthors "Grupo Platino"
+
+      - name: Publicar en GitHub Releases
+        shell: pwsh
+        run: |
+          vpk upload github `
+            -o releases `
+            --repoUrl https://github.com/${{ github.repository }} `
+            --token ${{ secrets.GITHUB_TOKEN }} `
+            --publish `
+            --releaseName "ORION AI ${{ github.ref_name }}" `
+            --tag ${{ github.ref_name }} `
+            --merge

@@ -41,7 +41,7 @@ public static class CompositionRoot
 
         // Adaptador real de auto-update (Velopack) — reemplaza al placeholder de fase.
         var feedUrl = Environment.GetEnvironmentVariable("ORION_UPDATE_FEED")
-            ?? "https://github.com/grupoplatino/orion-releases/releases/latest/download";
+            ?? "https://github.com/chernandez-glitch/orion";
         services.AddSingleton<Orion.Installer.IUpdateService>(sp =>
             new Orion.Installer.VelopackUpdateService(
                 sp.GetRequiredService<ILogger<Orion.Installer.VelopackUpdateService>>(), feedUrl));

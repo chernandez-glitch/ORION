@@ -2,6 +2,7 @@ using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Orion.Shared.Results;
 using Velopack;
+using Velopack.Sources;
 
 namespace Orion.Installer;
 
@@ -17,7 +18,7 @@ public sealed class VelopackUpdateService(ILogger<VelopackUpdateService> logger,
     {
         try
         {
-            var manager = new UpdateManager(feedUrl);
+            var manager = BuildManager();
             var current = ResolveCurrentVersion(manager);
 
             if (!manager.IsInstalled)
@@ -54,7 +55,7 @@ public sealed class VelopackUpdateService(ILogger<VelopackUpdateService> logger,
     {
         try
         {
-            var manager = new UpdateManager(feedUrl);
+            var manager = BuildManager();
             if (!manager.IsInstalled)
             {
                 return Result.Failure(Error.Failure("Installer.NotInstalled", "La app no está instalada vía Velopack."));
@@ -75,6 +76,22 @@ public sealed class VelopackUpdateService(ILogger<VelopackUpdateService> logger,
             logger.LogError(ex, "Fallo al aplicar la actualización.");
             return Result.Failure(Error.Failure("Installer.ApplyFailed", $"No se pudo aplicar la actualización: {ex.Message}"));
         }
+    }
+
+    /// <summary>
+    /// Construye el gestor de updates eligiendo la fuente según el feed: GitHub
+    /// Releases si la URL apunta a github.com, o una fuente web/carpeta genérica.
+    /// Un token opcional (ORION_UPDATE_TOKEN) permite repos privados.
+    /// </summary>
+    private UpdateManager BuildManager()
+    {
+        if (feedUrl.Contains("github.com", StringComparison.OrdinalIgnoreCase))
+        {
+            var token = Environment.GetEnvironmentVariable("ORION_UPDATE_TOKEN");
+            return new UpdateManager(new GithubSource(feedUrl, token, prerelease: false));
+        }
+
+        return new UpdateManager(feedUrl);
     }
 
     private static Version ResolveCurrentVersion(UpdateManager manager)
