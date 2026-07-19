@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Orion.Presentation.Views.LogsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:Orion.Presentation.Models"
+    mc:Ignorable="d"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
+
+    <Grid Padding="32,24" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <StackPanel>
+                <TextBlock Text="Logs" Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock Text="Actividad del sistema (muestra simulada)." Style="{StaticResource PageSubtitleTextStyle}" />
+            </StackPanel>
+            <Button Content="Recargar" HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Command="{x:Bind ViewModel.ReloadCommand}" />
+        </Grid>
+
+        <Border Grid.Row="1" Style="{StaticResource OrionCardStyle}" Padding="0">
+            <ListView ItemsSource="{x:Bind ViewModel.Logs}" SelectionMode="None" Padding="12,4">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="models:LogEntry">
+                        <Grid Padding="4,6" ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{x:Bind Time}" FontFamily="Consolas"
+                                       Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                            <TextBlock Grid.Column="1" Text="{x:Bind Level}" FontFamily="Consolas" FontWeight="SemiBold" Width="52" />
+                            <TextBlock Grid.Column="2" Text="{x:Bind Message}" FontFamily="Consolas" TextWrapping="Wrap" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Border>
+    </Grid>
+</Page>

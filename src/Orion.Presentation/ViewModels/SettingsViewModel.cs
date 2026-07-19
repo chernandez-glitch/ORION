@@ -28,6 +28,9 @@ public sealed partial class SettingsViewModel : ObservableObject
         _microphone = settings.Voice.Microphone;
         _speaker = settings.Voice.Speaker;
         _themeIndex = (int)settings.Appearance.Theme;
+        _workspacePath = settings.Paths.Workspace;
+        _vsCodePath = settings.Paths.VSCode;
+        _claudeCodePath = settings.Paths.ClaudeCode;
     }
 
     public IReadOnlyList<string> AvailableProviders { get; }
@@ -59,6 +62,15 @@ public sealed partial class SettingsViewModel : ObservableObject
     private int _themeIndex;
 
     [ObservableProperty]
+    private string _workspacePath;
+
+    [ObservableProperty]
+    private string _vsCodePath;
+
+    [ObservableProperty]
+    private string _claudeCodePath;
+
+    [ObservableProperty]
     private string _statusMessage = string.Empty;
 
     [RelayCommand]
@@ -73,6 +85,9 @@ public sealed partial class SettingsViewModel : ObservableObject
         settings.Voice.Microphone = Microphone;
         settings.Voice.Speaker = Speaker;
         settings.Appearance.Theme = (ThemePreference)ThemeIndex;
+        settings.Paths.Workspace = WorkspacePath;
+        settings.Paths.VSCode = VsCodePath;
+        settings.Paths.ClaudeCode = ClaudeCodePath;
 
         var result = await _configuration.SaveAsync(settings).ConfigureAwait(true);
         if (result.IsSuccess)

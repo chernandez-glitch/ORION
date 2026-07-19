@@ -55,6 +55,16 @@
                 </StackPanel>
             </Border>
 
+            <!-- Rutas -->
+            <Border Style="{StaticResource OrionCardStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Rutas" Style="{StaticResource CardHeaderTextStyle}" />
+                    <TextBox Header="Carpeta de trabajo (Workspace)" Text="{x:Bind ViewModel.WorkspacePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Header="Ruta de VS Code" Text="{x:Bind ViewModel.VsCodePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Header="Ruta de Claude Code" Text="{x:Bind ViewModel.ClaudeCodePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+            </Border>
+
             <StackPanel Orientation="Horizontal" Spacing="16">
                 <Button Content="Guardar" Style="{StaticResource AccentButtonStyle}" Command="{x:Bind ViewModel.SaveCommand}" />
                 <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"

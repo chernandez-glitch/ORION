@@ -7,6 +7,7 @@ using Orion.Infrastructure;
 using Orion.Installer;
 using Orion.Memory;
 using Orion.Plugins;
+using Orion.Presentation.Services;
 using Orion.Presentation.ViewModels;
 using Orion.Presentation.Views;
 using Orion.Voice;
@@ -49,16 +50,34 @@ public static class CompositionRoot
 
     private static void RegisterPresentation(IServiceCollection services)
     {
-        services.AddSingleton<MainWindow>();
+        // Servicios de UI (navegación y tema).
+        services.AddSingleton<INavigationService, NavigationService>();
+        services.AddSingleton<IThemeService, ThemeService>();
 
+        // Ventana y shell.
+        services.AddSingleton<MainWindow>();
+        services.AddSingleton<ShellViewModel>();
+
+        // Páginas.
         services.AddTransient<DashboardPage>();
+        services.AddTransient<ConversationsPage>();
+        services.AddTransient<AutomationPage>();
         services.AddTransient<CommandsPage>();
         services.AddTransient<MemoryPage>();
+        services.AddTransient<PluginsPage>();
+        services.AddTransient<LogsPage>();
         services.AddTransient<SettingsPage>();
+        services.AddTransient<AboutPage>();
 
+        // ViewModels.
         services.AddTransient<DashboardViewModel>();
+        services.AddTransient<ConversationsViewModel>();
+        services.AddTransient<AutomationViewModel>();
         services.AddTransient<CommandsViewModel>();
         services.AddTransient<MemoryViewModel>();
+        services.AddTransient<PluginsViewModel>();
+        services.AddTransient<LogsViewModel>();
         services.AddTransient<SettingsViewModel>();
+        services.AddTransient<AboutViewModel>();
     }
 }

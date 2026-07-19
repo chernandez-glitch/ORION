@@ -1,42 +1,50 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Orion.Presentation.Views;
+using Microsoft.UI.Xaml.Media;
+using Orion.Presentation.Services;
+using Orion.Presentation.ViewModels;
 
 namespace Orion.Presentation;
 
 /// <summary>
-/// Ventana principal: alberga la barra lateral de navegación (NavigationView) y
-/// un Frame donde se muestran las páginas. La navegación mapea el Tag del ítem
-/// al tipo de página; cada página resuelve su ViewModel desde el contenedor.
+/// Ventana principal: barra de título personalizada (con caption buttons
+/// nativos), backdrop Mica, sidebar de navegación y barra de estado. El
+/// code-behind solo contiene cromática de ventana (responsabilidad de la vista);
+/// la navegación, el tema y los estados viven en el ShellViewModel y los servicios.
 /// </summary>
 public sealed partial class MainWindow : Window
 {
     public MainWindow()
     {
+        ViewModel = App.Services.GetRequiredService<ShellViewModel>();
         InitializeComponent();
+
         Title = "ORION AI";
-        ContentFrame.Navigate(typeof(DashboardPage));
+        SystemBackdrop = new MicaBackdrop();
+        ExtendsContentIntoTitleBar = true;
+        SetTitleBar(AppTitleBar);
+
+        var navigation = App.Services.GetRequiredService<INavigationService>();
+        navigation.Initialize(ContentFrame);
+        App.Services.GetRequiredService<IThemeService>().Initialize(RootGrid);
+
+        RootGrid.Loaded += OnRootLoaded;
+        AppTitleBar.SizeChanged += (_, _) => UpdateTitleBarInset();
     }
 
-    private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+    public ShellViewModel ViewModel { get; }
+
+    private void OnRootLoaded(object sender, RoutedEventArgs e)
     {
-        if (args.IsSettingsInvoked)
-        {
-            ContentFrame.Navigate(typeof(SettingsPage));
-            return;
-        }
+        UpdateTitleBarInset();
+        ViewModel.StartClock(DispatcherQueue);
+        ViewModel.NavigateToDefault();
+    }
 
-        var tag = (args.InvokedItemContainer?.Tag as string) ?? "dashboard";
-        var pageType = tag switch
-        {
-            "commands" => typeof(CommandsPage),
-            "memory" => typeof(MemoryPage),
-            _ => typeof(DashboardPage)
-        };
-
-        if (ContentFrame.CurrentSourcePageType != pageType)
-        {
-            ContentFrame.Navigate(pageType);
-        }
+    /// <summary>Reserva a la derecha el ancho de los botones de sistema (min/max/cerrar).</summary>
+    private void UpdateTitleBarInset()
+    {
+        var scale = RootGrid.XamlRoot?.RasterizationScale ?? 1.0;
+        RightInsetColumn.Width = new GridLength(AppWindow.TitleBar.RightInset / scale);
     }
 }

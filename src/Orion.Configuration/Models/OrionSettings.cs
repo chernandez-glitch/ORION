@@ -14,6 +14,8 @@ public sealed class OrionSettings
 
     public AppearanceSettings Appearance { get; set; } = new();
 
+    public PathsSettings Paths { get; set; } = new();
+
     /// <summary>Atajos globales: nombre lógico → combinación de teclas.</summary>
     public Dictionary<string, string> Shortcuts { get; set; } = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -59,6 +61,16 @@ public sealed class VoiceSettings
 public sealed class AppearanceSettings
 {
     public ThemePreference Theme { get; set; } = ThemePreference.System;
+}
+
+/// <summary>Rutas favoritas de trabajo y herramientas.</summary>
+public sealed class PathsSettings
+{
+    public string Workspace { get; set; } = string.Empty;
+
+    public string VSCode { get; set; } = "code";
+
+    public string ClaudeCode { get; set; } = "claude";
 }
 
 public sealed class FavoriteRouteSettings

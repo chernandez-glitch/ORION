@@ -1,91 +1,46 @@
 using System.Collections.ObjectModel;
-using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.Logging;
-using Orion.Application.Dashboard;
-using Orion.Application.Memory.Dtos;
-using Orion.Shared.Modules;
+using Orion.Configuration;
+using Orion.Presentation.Models;
 
 namespace Orion.Presentation.ViewModels;
 
-/// <summary>ViewModel del dashboard: estado de módulos, CPU/RAM y últimos comandos.</summary>
-public sealed partial class DashboardViewModel(IDashboardService dashboard, ILogger<DashboardViewModel> logger) : ObservableObject
+/// <summary>
+/// Dashboard con métricas de un vistazo. En esta entrega los valores son
+/// simulados (no se conectan servicios); el proveedor y modelo de IA se leen de
+/// la configuración para reflejar los ajustes reales.
+/// </summary>
+public sealed partial class DashboardViewModel : ObservableObject
 {
-    [ObservableProperty]
-    private double _cpuPercent;
-
-    [ObservableProperty]
-    private double _ramUsedMb;
-
-    [ObservableProperty]
-    private double _ramTotalMb;
-
-    [ObservableProperty]
-    private double _ramPercent;
-
-    [ObservableProperty]
-    private int _registeredCommandCount;
-
-    [ObservableProperty]
-    private string _cpuText = "0 %";
-
-    [ObservableProperty]
-    private string _ramText = "0 %";
-
-    [ObservableProperty]
-    private string _ramDetailText = "—";
-
-    [ObservableProperty]
-    private bool _isLoading;
-
-    [ObservableProperty]
-    private bool _hasNoHistory = true;
-
-    public ObservableCollection<ModuleStatusReport> Modules { get; } = [];
-
-    public ObservableCollection<CommandHistoryDto> RecentCommands { get; } = [];
-
-    [RelayCommand]
-    public async Task RefreshAsync()
+    public DashboardViewModel(IConfigurationService configuration)
     {
-        IsLoading = true;
-        try
-        {
-            var result = await dashboard.GetSnapshotAsync().ConfigureAwait(true);
-            if (result.IsFailure)
-            {
-                logger.LogWarning("No se pudo cargar el dashboard: {Error}", result.Error);
-                return;
-            }
+        var ai = configuration.Current.AI;
 
-            var snapshot = result.Value;
-            CpuPercent = snapshot.Metrics.CpuPercent;
-            RamUsedMb = snapshot.Metrics.RamUsedMb;
-            RamTotalMb = snapshot.Metrics.RamTotalMb;
-            RamPercent = snapshot.Metrics.RamPercent;
-            RegisteredCommandCount = snapshot.RegisteredCommandCount;
+        Cards =
+        [
+            new StatCard("CPU", "23 %", "Uso del sistema", 0xE9D9),
+            new StatCard("Memoria RAM", "6.2 GB", "de 16 GB", 0xE964),
+            new StatCard("Micrófono", "Desactivado", "Voz en Fase 3", 0xE720),
+            new StatCard("Proveedor IA", ai.Provider, "Configurado", 0xE99A),
+            new StatCard("Modelo IA", ai.Model, "Listo en Fase 2", 0xE8D7),
+            new StatCard("Plugins", "0", "cargados", 0xEA86),
+            new StatCard("Comandos", "128", "ejecutados", 0xE756),
+            new StatCard("Automatizaciones", "3", "definidas", 0xE945),
+            new StatCard("Última actividad", "hace 2 min", "abrir-app notepad", 0xE823),
+            new StatCard("Tiempo activo", "1h 24m", "esta sesión", 0xE916)
+        ];
 
-            CpuText = string.Create(CultureInfo.InvariantCulture, $"{snapshot.Metrics.CpuPercent:0.0} %");
-            RamText = string.Create(CultureInfo.InvariantCulture, $"{snapshot.Metrics.RamPercent:0.0} %");
-            RamDetailText = string.Create(CultureInfo.InvariantCulture, $"{snapshot.Metrics.RamUsedMb:0} MB en uso");
-
-            Sync(Modules, snapshot.Modules);
-            Sync(RecentCommands, snapshot.RecentCommands);
-            HasNoHistory = RecentCommands.Count == 0;
-        }
-        finally
-        {
-            IsLoading = false;
-        }
+        Activity =
+        [
+            new ActivityEvent("09:20", "Configuración guardada", "Tema cambiado a oscuro", 0xE713),
+            new ActivityEvent("09:15", "Comando ejecutado", "abrir-app notepad", 0xE756),
+            new ActivityEvent("09:14", "Automatización", "process.launch no disponible (Fase 1)", 0xE945),
+            new ActivityEvent("09:12", "Memoria lista", "SQLite inicializado", 0xE81C),
+            new ActivityEvent("09:12", "ORION iniciado", "8 comandos registrados", 0xE945)
+        ];
     }
 
-    private static void Sync<T>(ObservableCollection<T> target, IReadOnlyList<T> source)
-    {
-        target.Clear();
-        foreach (var item in source)
-        {
-            target.Add(item);
-        }
-    }
+    public ObservableCollection<StatCard> Cards { get; }
+
+    public ObservableCollection<ActivityEvent> Activity { get; }
 }

@@ -4,13 +4,13 @@ using Orion.Presentation.ViewModels;
 
 namespace Orion.Presentation.Views;
 
-public sealed partial class DashboardPage : Page
+public sealed partial class LogsPage : Page
 {
-    public DashboardPage()
+    public LogsPage()
     {
-        ViewModel = App.Services.GetRequiredService<DashboardViewModel>();
+        ViewModel = App.Services.GetRequiredService<LogsViewModel>();
         InitializeComponent();
     }
 
-    public DashboardViewModel ViewModel { get; }
+    public LogsViewModel ViewModel { get; }
 }
