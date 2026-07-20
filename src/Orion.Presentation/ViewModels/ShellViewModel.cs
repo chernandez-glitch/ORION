@@ -41,6 +41,7 @@ public sealed partial class ShellViewModel : ObservableObject
             new NavItem("automation", "Automation Center", 0xE945),
             new NavItem("commands", "Comandos", 0xE756),
             new NavItem("memory", "Memory Center", 0xE81C),
+            new NavItem("voice", "Voice Center", 0xE720),
             new NavItem("plugins", "Plugins", 0xEA86),
             new NavItem("logs", "Logs", 0xE7C3)
         ];

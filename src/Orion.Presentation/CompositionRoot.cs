@@ -15,6 +15,7 @@ using Orion.Presentation.Services;
 using Orion.Presentation.ViewModels;
 using Orion.Presentation.Views;
 using Orion.Voice;
+using Orion.Voice.Engine;
 
 namespace Orion.Presentation;
 
@@ -42,6 +43,7 @@ public static class CompositionRoot
         services.AddScoped<Orion.Application.Commands.ICommandHistory, MemoryEngineCommandHistory>();
         services.AddOrionAI();
         services.AddOrionVoice();
+        services.AddOrionVoiceEngine();
         services.AddOrionAutomation();
         services.AddOrionWindows();
         services.AddOrionInstaller();
@@ -85,6 +87,7 @@ public static class CompositionRoot
         services.AddTransient<CommandsPage>();
         services.AddTransient<MemoryPage>();
         services.AddTransient<MemoryCenterPage>();
+        services.AddTransient<VoiceCenterPage>();
         services.AddTransient<PluginsPage>();
         services.AddTransient<LogsPage>();
         services.AddTransient<SettingsPage>();
@@ -97,6 +100,7 @@ public static class CompositionRoot
         services.AddTransient<CommandsViewModel>();
         services.AddTransient<MemoryViewModel>();
         services.AddTransient<MemoryCenterViewModel>();
+        services.AddTransient<VoiceCenterViewModel>();
         services.AddTransient<PluginsViewModel>();
         services.AddTransient<LogsViewModel>();
         services.AddTransient<SettingsViewModel>();

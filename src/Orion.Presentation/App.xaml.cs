@@ -40,6 +40,11 @@ public partial class App : Microsoft.UI.Xaml.Application
             ApplyTheme(configuration.Current.Appearance.Theme);
             _window.Activate();
 
+            // El Voice Engine arranca en modo escucha continua (wake word). En esta
+            // fase el motor Manual solo cambia de estado; no captura audio real ni
+            // ejecuta comandos: solo deja el pipeline preparado.
+            await StartVoiceEngineAsync().ConfigureAwait(true);
+
             logger.LogInformation("ORION AI iniciado correctamente.");
         }
         catch (Exception ex)
@@ -59,6 +64,13 @@ public partial class App : Microsoft.UI.Xaml.Application
         {
             Services.GetRequiredService<IMemorySession>().CurrentSessionId = result.Value.Id;
         }
+    }
+
+    /// <summary>Inicia el pipeline de voz en escucha continua (no bloquea el arranque si falla).</summary>
+    private static async Task StartVoiceEngineAsync()
+    {
+        var engine = Services.GetRequiredService<Orion.Voice.Engine.Abstractions.IVoiceEngine>();
+        await engine.StartAsync().ConfigureAwait(true);
     }
 
     /// <summary>Aplica la preferencia de tema a la ventana principal.</summary>

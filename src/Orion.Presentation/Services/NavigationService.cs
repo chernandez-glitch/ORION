@@ -17,6 +17,7 @@ public sealed class NavigationService : INavigationService
         ["automation"] = typeof(AutomationPage),
         ["commands"] = typeof(CommandsPage),
         ["memory"] = typeof(MemoryCenterPage),
+        ["voice"] = typeof(VoiceCenterPage),
         ["plugins"] = typeof(PluginsPage),
         ["logs"] = typeof(LogsPage),
         ["settings"] = typeof(SettingsPage),

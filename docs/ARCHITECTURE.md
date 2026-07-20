@@ -49,6 +49,11 @@ en `Application` o en el módulo correspondiente; las implementaciones concretas
   (`memory.db`): sesiones, conversaciones, proyectos, historial, favoritos,
   etiquetas, búsqueda y contexto. Se integra al Command Engine por la costura
   `ICommandHistory` sin modificarlo. Ver [MEMORY.md](MEMORY.md).
+- **Orion.Voice (Voice Engine)** — escucha por voz: micrófono → wake word ("Orion")
+  → STT → parser de comandos. Proveedores de wake word/STT/TTS intercambiables por
+  configuración. En esta fase llega hasta *Audio → Texto → Parser → Mostrar
+  resultado*: sin IA y **sin ejecutar comandos** (costura lista vía `ICommandParser`).
+  Ver [VOICE.md](VOICE.md).
 - **Módulos** — Cada capacidad enchufable con su `AddOrionXxx()` de DI.
 - **Presentation** — Composition root (`CompositionRoot`), ventana, páginas y
   ViewModels (MVVM con CommunityToolkit.Mvvm).
