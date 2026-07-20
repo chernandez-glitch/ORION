@@ -16,6 +16,7 @@
     <ProjectReference Include="..\..\src\Orion.Configuration\Orion.Configuration.csproj" />
     <ProjectReference Include="..\..\src\Orion.Plugins\Orion.Plugins.csproj" />
     <ProjectReference Include="..\..\src\Orion.Automation\Orion.Automation.csproj" />
+    <ProjectReference Include="..\..\src\Orion.Windows\Orion.Windows.csproj" />
   </ItemGroup>
 
   <ItemGroup>

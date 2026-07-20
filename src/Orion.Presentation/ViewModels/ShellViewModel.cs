@@ -38,7 +38,7 @@ public sealed partial class ShellViewModel : ObservableObject
         [
             new NavItem("dashboard", "Dashboard", 0xE80F),
             new NavItem("conversations", "Conversaciones", 0xE8BD),
-            new NavItem("automation", "Automatizaciones", 0xE945),
+            new NavItem("automation", "Automation Center", 0xE945),
             new NavItem("commands", "Comandos", 0xE756),
             new NavItem("memory", "Memoria", 0xE81C),
             new NavItem("plugins", "Plugins", 0xEA86),
@@ -137,7 +137,7 @@ public sealed partial class ShellViewModel : ObservableObject
     private static StatusPillItem Pill(string module, ModuleStatus status, string detail) =>
         new(module, detail, new SolidColorBrush(ColorFor(status)));
 
-    private static Windows.UI.Color ColorFor(ModuleStatus status) => status switch
+    private static global::Windows.UI.Color ColorFor(ModuleStatus status) => status switch
     {
         ModuleStatus.Ready => Colors.SeaGreen,
         ModuleStatus.Degraded => Colors.Goldenrod,

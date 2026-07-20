@@ -17,10 +17,13 @@ en verde.
 - Logging con Serilog, DI en todos los módulos.
 - **Sin** IA, voz, automatización real, ni integraciones (por diseño).
 
-## Fase 1 — Automatización Windows real
+## Fase 1 — Automatización Windows real ✅ (entregada)
 
-Adaptadores concretos para `Orion.Automation` (procesos, archivos, input,
-ventanas, energía) con confirmaciones de seguridad.
+**Windows Automation Engine** (`Orion.Windows`): SDK con 13 servicios reales
+(proceso, ventana, teclado, mouse, explorer, PowerShell, CMD, portapapeles,
+archivos, accesos directos, sistema, tareas) vía P/Invoke + BCL, con guarda de
+seguridad y logging. Integrado al Command Engine con comandos reales y expuesto
+en el **Automation Center** y los widgets del dashboard (CPU/RAM/disco/red/procesos).
 
 ## Fase 2 — Inteligencia Artificial
 

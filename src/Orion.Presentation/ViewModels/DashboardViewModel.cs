@@ -1,46 +1,53 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Orion.Configuration;
 using Orion.Presentation.Models;
+using Orion.Windows.Abstractions;
+using Orion.Windows.Models;
 
 namespace Orion.Presentation.ViewModels;
 
 /// <summary>
-/// Dashboard con métricas de un vistazo. En esta entrega los valores son
-/// simulados (no se conectan servicios); el proveedor y modelo de IA se leen de
-/// la configuración para reflejar los ajustes reales.
+/// Dashboard con widgets reales del sistema (CPU, RAM, disco, red, procesos)
+/// tomados de <see cref="ISystemMonitor"/>, más el estado de IA/plugins.
 /// </summary>
-public sealed partial class DashboardViewModel : ObservableObject
+public sealed partial class DashboardViewModel(IConfigurationService configuration, ISystemMonitor monitor) : ObservableObject
 {
-    public DashboardViewModel(IConfigurationService configuration)
+    public ObservableCollection<StatCard> Cards { get; } = [];
+
+    public ObservableCollection<ActivityEvent> Activity { get; } =
+    [
+        new ActivityEvent("09:20", "Configuración guardada", "Tema cambiado a oscuro", 0xE713),
+        new ActivityEvent("09:15", "Comando ejecutado", "abrir-app notepad", 0xE756),
+        new ActivityEvent("09:12", "Motor de comandos", "comandos registrados", 0xE945),
+        new ActivityEvent("09:12", "ORION iniciado", "SQLite listo", 0xE81C)
+    ];
+
+    public void Refresh()
     {
+        var result = monitor.GetLoad();
+        var load = result.IsSuccess ? result.Value : SystemLoad.Empty;
         var ai = configuration.Current.AI;
 
-        Cards =
-        [
-            new StatCard("CPU", "23 %", "Uso del sistema", 0xE9D9),
-            new StatCard("Memoria RAM", "6.2 GB", "de 16 GB", 0xE964),
-            new StatCard("Micrófono", "Desactivado", "Voz en Fase 3", 0xE720),
-            new StatCard("Proveedor IA", ai.Provider, "Configurado", 0xE99A),
-            new StatCard("Modelo IA", ai.Model, "Listo en Fase 2", 0xE8D7),
-            new StatCard("Plugins", "0", "cargados", 0xEA86),
-            new StatCard("Comandos", "128", "ejecutados", 0xE756),
-            new StatCard("Automatizaciones", "3", "definidas", 0xE945),
-            new StatCard("Última actividad", "hace 2 min", "abrir-app notepad", 0xE823),
-            new StatCard("Tiempo activo", "1h 24m", "esta sesión", 0xE916)
-        ];
+        var cards = new[]
+        {
+            new StatCard("CPU", Inv($"{load.CpuPercent:0} %"), "Uso del sistema", 0xE9D9),
+            new StatCard("Memoria RAM", Inv($"{load.RamPercent:0} %"), Inv($"{load.RamUsedMb:0} de {load.RamTotalMb:0} MB"), 0xE964),
+            new StatCard("Disco", Inv($"{load.DiskPercent:0} %"), Inv($"{load.DiskUsedGb:0} de {load.DiskTotalGb:0} GB"), 0xEDA2),
+            new StatCard("Red", Inv($"{load.NetworkKbps:0} KB/s"), "tráfico actual", 0xE968),
+            new StatCard("Procesos", load.ProcessCount.ToString(CultureInfo.InvariantCulture), "activos", 0xE9D2),
+            new StatCard("Proveedor IA", ai.Provider, "configurado", 0xE99A),
+            new StatCard("Modelo IA", ai.Model, "Fase 2", 0xE8D7),
+            new StatCard("Plugins", "0", "cargados", 0xEA86)
+        };
 
-        Activity =
-        [
-            new ActivityEvent("09:20", "Configuración guardada", "Tema cambiado a oscuro", 0xE713),
-            new ActivityEvent("09:15", "Comando ejecutado", "abrir-app notepad", 0xE756),
-            new ActivityEvent("09:14", "Automatización", "process.launch no disponible (Fase 1)", 0xE945),
-            new ActivityEvent("09:12", "Memoria lista", "SQLite inicializado", 0xE81C),
-            new ActivityEvent("09:12", "ORION iniciado", "8 comandos registrados", 0xE945)
-        ];
+        Cards.Clear();
+        foreach (var card in cards)
+        {
+            Cards.Add(card);
+        }
     }
 
-    public ObservableCollection<StatCard> Cards { get; }
-
-    public ObservableCollection<ActivityEvent> Activity { get; }
+    private static string Inv(FormattableString text) => text.ToString(CultureInfo.InvariantCulture);
 }

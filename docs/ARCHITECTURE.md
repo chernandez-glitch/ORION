@@ -19,9 +19,10 @@ núcleo. Las capas internas no conocen las externas.
 |----------|-----------|
 | Orion.Shared | — |
 | Orion.Domain | Shared |
-| Orion.Application | Domain, Shared, Automation |
+| Orion.Application | Domain, Shared, Automation, **Windows** |
 | Orion.Infrastructure | Application, Domain, Shared |
 | Orion.Memory | Application, Domain, Shared |
+| **Orion.Windows** | Shared *(SDK de control de Windows: P/Invoke + BCL)* |
 | Orion.AI / Voice / Automation / Configuration / Installer | Shared |
 | Orion.Plugins | Application, Shared |
 | Orion.Presentation | Todos |
@@ -41,6 +42,9 @@ en `Application` o en el módulo correspondiente; las implementaciones concretas
   (`ISystemMetrics`), DTOs.
 - **Infrastructure** — `OrionDbContext` (SQLite), configuraciones EF, repositorios,
   `SystemMetrics`, wiring de Serilog. Implementa lo que Application define.
+- **Orion.Windows** — Windows Automation Engine: 13 servicios (proceso, ventana,
+  teclado, mouse, shell, archivos, portapapeles, sistema, tareas…) que encapsulan
+  todo el interop de Windows tras interfaces. Ver [AUTOMATION.md](AUTOMATION.md).
 - **Módulos** — Cada capacidad enchufable con su `AddOrionXxx()` de DI.
 - **Presentation** — Composition root (`CompositionRoot`), ventana, páginas y
   ViewModels (MVVM con CommunityToolkit.Mvvm).

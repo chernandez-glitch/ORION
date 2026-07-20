@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+    <!-- SYSLIB1054/CA1401/CA5392: usamos DllImport clásico deliberadamente para
+         las firmas con delegados/buffers; el interop está aislado en Native/. -->
+    <NoWarn>$(NoWarn);SYSLIB1054;CA1401;CA5392;CA1806;CA1838</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Orion.Shared\Orion.Shared.csproj" />
-    <ProjectReference Include="..\Orion.Domain\Orion.Domain.csproj" />
-    <ProjectReference Include="..\Orion.Automation\Orion.Automation.csproj" />
-    <ProjectReference Include="..\Orion.Windows\Orion.Windows.csproj" />
   </ItemGroup>
 
   <ItemGroup>

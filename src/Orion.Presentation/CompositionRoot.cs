@@ -8,6 +8,7 @@ using Orion.Infrastructure;
 using Orion.Installer;
 using Orion.Memory;
 using Orion.Plugins;
+using Orion.Windows;
 using Orion.Presentation.Services;
 using Orion.Presentation.ViewModels;
 using Orion.Presentation.Views;
@@ -36,6 +37,7 @@ public static class CompositionRoot
         services.AddOrionAI();
         services.AddOrionVoice();
         services.AddOrionAutomation();
+        services.AddOrionWindows();
         services.AddOrionInstaller();
         services.AddOrionPlugins();
 

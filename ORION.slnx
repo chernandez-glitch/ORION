@@ -14,6 +14,7 @@
     </Project>
     <Project Path="src/Orion.Shared/Orion.Shared.csproj" />
     <Project Path="src/Orion.Voice/Orion.Voice.csproj" />
+    <Project Path="src/Orion.Windows/Orion.Windows.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Orion.Tests/Orion.Tests.csproj" />

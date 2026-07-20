@@ -30,6 +30,7 @@
     <ProjectReference Include="..\Orion.Automation\Orion.Automation.csproj" />
     <ProjectReference Include="..\Orion.Configuration\Orion.Configuration.csproj" />
     <ProjectReference Include="..\Orion.Plugins\Orion.Plugins.csproj" />
+    <ProjectReference Include="..\Orion.Windows\Orion.Windows.csproj" />
     <ProjectReference Include="..\Orion.Installer\Orion.Installer.csproj" />
   </ItemGroup>
 

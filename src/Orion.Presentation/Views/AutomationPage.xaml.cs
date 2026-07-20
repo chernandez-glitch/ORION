@@ -10,6 +10,7 @@ public sealed partial class AutomationPage : Page
     {
         ViewModel = App.Services.GetRequiredService<AutomationViewModel>();
         InitializeComponent();
+        Loaded += async (_, _) => await ViewModel.RefreshAsync();
     }
 
     public AutomationViewModel ViewModel { get; }

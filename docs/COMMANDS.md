@@ -57,10 +57,19 @@ configuración.
 | Abrir Explorador | `system.open-explorer` | System | explorador, explorer |
 | Abrir VS Code | `vscode.open` | VSCode | vscode, code |
 | Abrir proyecto | `vscode.open-project` | VSCode | proyecto, project |
-| Apagar / Reiniciar / Bloquear | `system.shutdown` / `.restart` / `.lock` | System | apagar, reiniciar, bloquear |
+| Apagar / Reiniciar / Bloquear / Suspender | `system.shutdown` / `.restart` / `.lock` / `.sleep` | System | apagar, reiniciar, bloquear, suspender |
+| Cerrar aplicación | `process.close` | Applications | cerrar-app, close-app |
+| Terminar proceso | `process.kill` | System | matar-proceso, kill |
+| Crear carpeta | `files.create-folder` | Folders | crear-carpeta, mkdir |
+| Eliminar archivo | `files.delete-file` | Files | eliminar-archivo, del-file |
+| Abrir PowerShell | `powershell.open` | PowerShell | powershell |
+| Ejecutar PowerShell | `powershell.run` | PowerShell | ps, run-ps |
+| Ejecutar CMD | `cmd.run` | System | cmd, run-cmd |
 
-Los cinco primeros **funcionan de verdad** (lanzan procesos vía el adaptador
-`WindowsProcessAutomation`; `Mostrar mensaje` usa un `ContentDialog`).
+Estos comandos **funcionan de verdad**: los de proceso/archivo/shell usan el
+**Windows Automation Engine** (`Orion.Windows`, ver [AUTOMATION.md](AUTOMATION.md));
+`Mostrar mensaje` usa un `ContentDialog`. Los destructivos (matar/borrar/apagar)
+requieren permiso `Elevated` y pasan por la guarda de seguridad.
 
 ## Command Palette (Ctrl+Shift+P)
 
