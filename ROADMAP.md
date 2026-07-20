@@ -25,6 +25,14 @@ archivos, accesos directos, sistema, tareas) vía P/Invoke + BCL, con guarda de
 seguridad y logging. Integrado al Command Engine con comandos reales y expuesto
 en el **Automation Center** y los widgets del dashboard (CPU/RAM/disco/red/procesos).
 
+## Memory Engine ✅ (entregado)
+
+Memoria permanente (`Orion.Memory`, namespace `Orion.Memory.Engine`) con EF Core +
+SQLite propio: 14 entidades, servicios de sesión/conversación/proyecto/historial/
+favoritos/etiquetas/búsqueda/contexto, export/import JSON-CSV, integración
+automática con el Command Engine (clasifica apps/carpetas), sesión al arranque, y
+**Memory Center** en la UI. Listo para que la IA lo consulte por interfaces.
+
 ## Fase 2 — Inteligencia Artificial
 
 Implementar `IAIProvider` empezando por Ollama (local) y Claude. Un

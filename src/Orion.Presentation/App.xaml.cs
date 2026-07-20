@@ -3,6 +3,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Orion.Configuration;
 using Orion.Infrastructure;
+using Orion.Memory.Engine;
+using Orion.Memory.Engine.Abstractions;
 
 namespace Orion.Presentation;
 
@@ -28,6 +30,8 @@ public partial class App : Microsoft.UI.Xaml.Application
         try
         {
             await Services.InitializeDatabaseAsync().ConfigureAwait(true);
+            await Services.InitializeMemoryDatabaseAsync().ConfigureAwait(true);
+            await StartMemorySessionAsync().ConfigureAwait(true);
 
             var configuration = Services.GetRequiredService<IConfigurationService>();
             await configuration.LoadAsync().ConfigureAwait(true);
@@ -42,6 +46,18 @@ public partial class App : Microsoft.UI.Xaml.Application
         {
             logger.LogCritical(ex, "Fallo crítico durante el arranque de ORION.");
             throw;
+        }
+    }
+
+    /// <summary>Crea la sesión de memoria del arranque y la fija como sesión activa.</summary>
+    private static async Task StartMemorySessionAsync()
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var sessions = scope.ServiceProvider.GetRequiredService<ISessionService>();
+        var result = await sessions.StartSessionAsync().ConfigureAwait(true);
+        if (result.IsSuccess)
+        {
+            Services.GetRequiredService<IMemorySession>().CurrentSessionId = result.Value.Id;
         }
     }
 

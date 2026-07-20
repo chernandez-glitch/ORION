@@ -7,6 +7,8 @@ using Orion.Configuration;
 using Orion.Infrastructure;
 using Orion.Installer;
 using Orion.Memory;
+using Orion.Memory.Engine;
+using Orion.Memory.Engine.Services;
 using Orion.Plugins;
 using Orion.Windows;
 using Orion.Presentation.Services;
@@ -34,6 +36,10 @@ public static class CompositionRoot
         services.AddOrionInfrastructure();
         services.AddOrionApplication();
         services.AddOrionMemory();
+        services.AddOrionMemoryEngine();
+        // Integración: el Command Engine persiste su historial en el Memory Engine
+        // (y clasifica apps/carpetas) sin modificar el motor — solo la costura ICommandHistory.
+        services.AddScoped<Orion.Application.Commands.ICommandHistory, MemoryEngineCommandHistory>();
         services.AddOrionAI();
         services.AddOrionVoice();
         services.AddOrionAutomation();
@@ -78,6 +84,7 @@ public static class CompositionRoot
         services.AddTransient<AutomationPage>();
         services.AddTransient<CommandsPage>();
         services.AddTransient<MemoryPage>();
+        services.AddTransient<MemoryCenterPage>();
         services.AddTransient<PluginsPage>();
         services.AddTransient<LogsPage>();
         services.AddTransient<SettingsPage>();
@@ -89,6 +96,7 @@ public static class CompositionRoot
         services.AddTransient<AutomationViewModel>();
         services.AddTransient<CommandsViewModel>();
         services.AddTransient<MemoryViewModel>();
+        services.AddTransient<MemoryCenterViewModel>();
         services.AddTransient<PluginsViewModel>();
         services.AddTransient<LogsViewModel>();
         services.AddTransient<SettingsViewModel>();

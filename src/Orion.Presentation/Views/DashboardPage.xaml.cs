@@ -17,9 +17,9 @@ public sealed partial class DashboardPage : Page
 
         _timer = DispatcherQueue.CreateTimer();
         _timer.Interval = TimeSpan.FromSeconds(2);
-        _timer.Tick += (_, _) => ViewModel.Refresh();
+        _timer.Tick += async (_, _) => await ViewModel.RefreshAsync();
 
-        Loaded += (_, _) => { ViewModel.Refresh(); _timer.Start(); };
+        Loaded += async (_, _) => { await ViewModel.RefreshAsync(); _timer.Start(); };
         Unloaded += (_, _) => _timer.Stop();
     }
 

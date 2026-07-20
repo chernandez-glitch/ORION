@@ -21,7 +21,7 @@ núcleo. Las capas internas no conocen las externas.
 | Orion.Domain | Shared |
 | Orion.Application | Domain, Shared, Automation, **Windows** |
 | Orion.Infrastructure | Application, Domain, Shared |
-| Orion.Memory | Application, Domain, Shared |
+| Orion.Memory | Application, Domain, Shared *(+ EF Core/SQLite propios: el Memory Engine)* |
 | **Orion.Windows** | Shared *(SDK de control de Windows: P/Invoke + BCL)* |
 | Orion.AI / Voice / Automation / Configuration / Installer | Shared |
 | Orion.Plugins | Application, Shared |
@@ -45,6 +45,10 @@ en `Application` o en el módulo correspondiente; las implementaciones concretas
 - **Orion.Windows** — Windows Automation Engine: 13 servicios (proceso, ventana,
   teclado, mouse, shell, archivos, portapapeles, sistema, tareas…) que encapsulan
   todo el interop de Windows tras interfaces. Ver [AUTOMATION.md](AUTOMATION.md).
+- **Orion.Memory (Memory Engine)** — memoria permanente con EF Core/SQLite propio
+  (`memory.db`): sesiones, conversaciones, proyectos, historial, favoritos,
+  etiquetas, búsqueda y contexto. Se integra al Command Engine por la costura
+  `ICommandHistory` sin modificarlo. Ver [MEMORY.md](MEMORY.md).
 - **Módulos** — Cada capacidad enchufable con su `AddOrionXxx()` de DI.
 - **Presentation** — Composition root (`CompositionRoot`), ventana, páginas y
   ViewModels (MVVM con CommunityToolkit.Mvvm).
